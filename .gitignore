@@ -1,0 +1,6 @@
+data/
+results/scores/
+results/inductive/
+__pycache__/
+*.pyc
+.venv/

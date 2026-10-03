@@ -1,0 +1,49 @@
+== 1. environment and dependency lock
+[PASS] installed packages match requirements-lock.txt -- 0 mismatches
+== 2. data hashes (protocol section 3)
+[PASS] elliptic_txs_features.csv digest starts with protocol value -- protocol length=46 hex chars
+[FAIL] elliptic_txs_features.csv protocol value is a full 64-char SHA-256 -- length=46
+[PASS] elliptic_txs_classes.csv digest starts with protocol value -- protocol length=46 hex chars
+[FAIL] elliptic_txs_classes.csv protocol value is a full 64-char SHA-256 -- length=46
+[PASS] elliptic_txs_edgelist.csv digest starts with protocol value -- protocol length=46 hex chars
+[FAIL] elliptic_txs_edgelist.csv protocol value is a full 64-char SHA-256 -- length=46
+== 3. data counts, splits, subgroups (structure only)
+[PASS] full-data counts match protocol section 3 -- got={'nodes': 203769, 'edges': 234355, 'illicit': 4545, 'licit': 42019, 'unknown': 157205}
+[PASS] 0 edges cross time steps -- cross=0
+[PASS] 49 time steps
+[PASS] recomputed audit equals committed results/raw/data_audit.csv
+[PASS] [all165] train labeled illicit/licit match section 4 -- got=(2219, 21387)
+[PASS] [all165] train edge indices valid
+[PASS] [all165] val labeled illicit/licit match section 4 -- got=(1243, 5045)
+[PASS] [all165] val edge indices valid
+[PASS] [all165] test labeled illicit/licit match section 4 -- got=(1083, 15587)
+[PASS] [all165] test edge indices valid
+[PASS] [all165] splits cover the stated time steps
+[PASS] [all165] node ids disjoint across splits
+[PASS] [all165] train features standardized on train period
+[PASS] [local93] train edge indices valid
+[PASS] [local93] val edge indices valid
+[PASS] [local93] test edge indices valid
+[PASS] [local93] splits cover the stated time steps
+[PASS] [local93] node ids disjoint across splits
+[PASS] [local93] train features standardized on train period
+[PASS] train subgroup sizes match protocol section 9 -- got={'in0': (7405, 582), 'in1': (10710, 1559), 'in2plus': (5491, 78)}
+[PASS] in_degree() equals in-degree only (not total degree)
+    window 35-42: illicit test nodes = 914 (underpowered if < 30)
+    window 43-49: illicit test nodes = 169 (underpowered if < 30)
+== 4. strict inductive split construction (structure only, no fit)
+[PASS] inductive: held-out nodes and all incident edges absent from training graph, seeds 0-9
+== 5. one-command path up to the model-fit boundary
+    run_all.sh order: ['check_data', 'run_seeds', 'subgroups', 'shifts', 'inductive', 'stats', 'plots', 'compute_receipt']
+[PASS] module check_data exists and compiles
+[PASS] module run_seeds exists and compiles
+[PASS] module subgroups exists and compiles
+[PASS] module shifts exists and compiles
+[PASS] module inductive exists and compiles
+[PASS] module stats exists and compiles
+[PASS] module plots exists and compiles
+[PASS] module compute_receipt exists and compiles
+    first fit happens in: run_seeds (not executed here)
+[FAIL] run_seeds.py does not overwrite the imported `time` module -- assignment to name `time` at line(s) [23]
+[PASS] PROTOCOL.md unchanged vs tag protocol-v1
+[PASS] fraudshift/config.py unchanged vs tag protocol-v1

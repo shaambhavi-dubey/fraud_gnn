@@ -1,0 +1,238 @@
+{
+  "environment": {
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "lock_encoding": "utf-16",
+    "lock_vs_installed_mismatch": {}
+  },
+  "checks": {
+    "installed packages match requirements-lock.txt": {
+      "pass": true,
+      "detail": "0 mismatches"
+    },
+    "elliptic_txs_features.csv digest starts with protocol value": {
+      "pass": true,
+      "detail": "protocol length=46 hex chars"
+    },
+    "elliptic_txs_features.csv protocol value is a full 64-char SHA-256": {
+      "pass": false,
+      "detail": "length=46"
+    },
+    "elliptic_txs_classes.csv digest starts with protocol value": {
+      "pass": true,
+      "detail": "protocol length=46 hex chars"
+    },
+    "elliptic_txs_classes.csv protocol value is a full 64-char SHA-256": {
+      "pass": false,
+      "detail": "length=46"
+    },
+    "elliptic_txs_edgelist.csv digest starts with protocol value": {
+      "pass": true,
+      "detail": "protocol length=46 hex chars"
+    },
+    "elliptic_txs_edgelist.csv protocol value is a full 64-char SHA-256": {
+      "pass": false,
+      "detail": "length=46"
+    },
+    "full-data counts match protocol section 3": {
+      "pass": true,
+      "detail": "got={'nodes': 203769, 'edges': 234355, 'illicit': 4545, 'licit': 42019, 'unknown': 157205}"
+    },
+    "0 edges cross time steps": {
+      "pass": true,
+      "detail": "cross=0"
+    },
+    "49 time steps": {
+      "pass": true,
+      "detail": ""
+    },
+    "recomputed audit equals committed results/raw/data_audit.csv": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] train labeled illicit/licit match section 4": {
+      "pass": true,
+      "detail": "got=(2219, 21387)"
+    },
+    "[all165] train edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] val labeled illicit/licit match section 4": {
+      "pass": true,
+      "detail": "got=(1243, 5045)"
+    },
+    "[all165] val edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] test labeled illicit/licit match section 4": {
+      "pass": true,
+      "detail": "got=(1083, 15587)"
+    },
+    "[all165] test edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] splits cover the stated time steps": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] node ids disjoint across splits": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] train features standardized on train period": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] train edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] val edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] test edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] splits cover the stated time steps": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] node ids disjoint across splits": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] train features standardized on train period": {
+      "pass": true,
+      "detail": ""
+    },
+    "train subgroup sizes match protocol section 9": {
+      "pass": true,
+      "detail": "got={'in0': (7405, 582), 'in1': (10710, 1559), 'in2plus': (5491, 78)}"
+    },
+    "in_degree() equals in-degree only (not total degree)": {
+      "pass": true,
+      "detail": ""
+    },
+    "inductive: held-out nodes and all incident edges absent from training graph, seeds 0-9": {
+      "pass": true,
+      "detail": ""
+    },
+    "module check_data exists and compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module run_seeds exists and compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module subgroups exists and compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module shifts exists and compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module inductive exists and compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module stats exists and compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module plots exists and compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module compute_receipt exists and compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "run_seeds.py does not overwrite the imported `time` module": {
+      "pass": false,
+      "detail": "assignment to name `time` at line(s) [23]"
+    },
+    "PROTOCOL.md unchanged vs tag protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/config.py unchanged vs tag protocol-v1": {
+      "pass": true,
+      "detail": ""
+    }
+  },
+  "data_sha256_full": {
+    "elliptic_txs_features.csv": "fd7f83573443c9e302e371d3f110e3b6224160f5d1ed8a287757936127800ff0",
+    "elliptic_txs_classes.csv": "93e2e7b2405c735ba752bf6ba06b947561deddd1f5a8fc91e46f6a4c0e439493",
+    "elliptic_txs_edgelist.csv": "a35053ba68a98e4382cae2ba65b9d9e36b23b6439e02dff084971b1b72a5156e"
+  },
+  "group_sizes_nodes_illicit": {
+    "train": {
+      "in0": [
+        7405,
+        582
+      ],
+      "in1": [
+        10710,
+        1559
+      ],
+      "in2plus": [
+        5491,
+        78
+      ]
+    },
+    "val": {
+      "in0": [
+        1935,
+        317
+      ],
+      "in1": [
+        3590,
+        884
+      ],
+      "in2plus": [
+        763,
+        42
+      ]
+    },
+    "test": {
+      "in0": [
+        5816,
+        306
+      ],
+      "in1": [
+        8499,
+        722
+      ],
+      "in2plus": [
+        2355,
+        55
+      ]
+    }
+  },
+  "window_illicit_counts": {
+    "35-42": 914,
+    "43-49": 169
+  },
+  "run_all_order": [
+    "check_data",
+    "run_seeds",
+    "subgroups",
+    "shifts",
+    "inductive",
+    "stats",
+    "plots",
+    "compute_receipt"
+  ],
+  "git": {
+    "head": "182f34fcfabd5a9615433ef70130901e6d78bf45",
+    "protocol_tag": "633487f35cc8946ed945acb599bb0f186ba2db16"
+  },
+  "no_outcome_statement": "No model was fit and no metric, loss or prediction was produced."
+}

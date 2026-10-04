@@ -198,9 +198,9 @@ def data_split_check():
         RECEIPT.setdefault("window_illicit_counts", {})[wname] = n
 
 
-# ---------------------------------------------------------------- 5. temporal path unchanged vs protocol-v1
+# ---------------------------------------------------------------- 5. temporal path vs protocol-v1 and float64 reference
 def old_vs_new_check():
-    say("== 5. refactored build_splits() is bit-identical to protocol-v1")
+    say("== 5. build_splits(): structure identical to protocol-v1, scaler accurate (correction 5)")
     src = git("show", "protocol-v1:fraudshift/data.py", strip=False)
     with tempfile.TemporaryDirectory() as td:
         pkg = Path(td) / "oldpkg"
@@ -214,9 +214,29 @@ def old_vs_new_check():
             for fs in C.FEATURE_SETS:
                 _, a = old.build_splits(fs)
                 _, b = build_splits(fs)
+                _, raw_sp = build_raw_splits(fs)
                 same = all(np.array_equal(getattr(a[k], f), getattr(b[k], f))
-                           for k in a for f in ("x", "y", "edge_index", "time", "node_idx"))
-                check(f"[{fs}] train/val/test graphs identical to protocol-v1 build_splits", same)
+                           for k in a for f in ("y", "edge_index", "time", "node_idx"))
+                check(f"[{fs}] labels, edges, time steps, node ids identical to protocol-v1 build_splits", same)
+                # float64 reference standardization from the raw train-period rows
+                tr64 = raw_sp["train"].x.astype(np.float64)
+                m64, s64 = tr64.mean(0), tr64.std(0)
+                s64[s64 == 0] = 1.0
+                worst_new = worst_old = worst_gap = 0.0
+                for k in b:
+                    ref = ((raw_sp[k].x.astype(np.float64) - m64) / s64)
+                    worst_new = max(worst_new, float(np.abs(b[k].x - ref).max()))
+                    worst_old = max(worst_old, float(np.abs(a[k].x - ref).max()))
+                    worst_gap = max(worst_gap, float(np.abs(b[k].x - a[k].x).max()))
+                check(f"[{fs}] standardized features equal the float64 reference within 1e-4", worst_new < 1e-4,
+                      f"max abs diff {worst_new:.2e}")
+                say(f"    [{fs}] protocol-v1 float32 scaler: max abs diff to float64 reference {worst_old:.2e}; "
+                    f"new vs protocol-v1: {worst_gap:.2e}")
+                RECEIPT.setdefault("scaler_precision", {})[fs] = dict(
+                    new_vs_float64=worst_new, protocol_v1_vs_float64=worst_old, new_vs_protocol_v1=worst_gap)
+                sds = raw_sp["train"].x.std(0, dtype=np.float64)
+                check(f"[{fs}] no zero or near-constant feature column in the train period (min sd > 1e-6)",
+                      float(sds.min()) > 1e-6, f"min sd {float(sds.min()):.3e}")
         finally:
             sys.path.remove(td)
             for m in [m for m in sys.modules if m.startswith("oldpkg")]:
@@ -230,7 +250,7 @@ def inductive_check():
     raw_tr, raw_val = raw["train"], raw["val"]
     _, std = build_splits(C.PRIMARY_FS)
     ok_leak = ok_scaler = ok_indep = ok_pert = ok_same_as_v1 = True
-    worst = 0.0
+    worst = worst_v1 = 0.0
     for seed in C.SEEDS:
         sp = make_inductive_split(raw_tr, raw_val, seed)      # also runs the in-code leakage asserts
         mask = np.zeros(raw_tr.n, dtype=bool)
@@ -247,20 +267,28 @@ def inductive_check():
         ok_indep &= (np.array_equal(sp.scaler[0], sp2.scaler[0]) and np.array_equal(sp.scaler[1], sp2.scaler[1])
                      and np.array_equal(sp.g_train.x, sp2.g_train.x) and np.array_equal(sp.g_val.x, sp2.g_val.x))
         ok_pert &= not np.array_equal(sp.g_infer.x[sp.held], sp2.g_infer.x[sp.held])   # perturbation was real
-        # numerically the same final features as the protocol-v1 double-standardization route
+        # final training features equal a float64 reference computed from the retained raw rows only
+        r64 = raw_tr.x[~mask].astype(np.float64)
+        s64 = r64.std(0)
+        s64[s64 == 0] = 1.0
+        d = float(np.abs(sp.g_train.x - (r64 - r64.mean(0)) / s64).max())
+        worst = max(worst, d)
+        ok_same_as_v1 &= d < 1e-4
+        # informational: distance to the protocol-v1 two-step float32 route
         xs = std["train"].x[~mask]
         m1, s1 = xs.mean(0), xs.std(0)
         s1[s1 == 0] = 1.0
-        d = float(np.abs(((xs - m1) / s1) - sp.g_train.x).max())
-        worst = max(worst, d)
-        ok_same_as_v1 &= d < 1e-3
+        worst_v1 = max(worst_v1, float(np.abs(((xs - m1) / s1) - sp.g_train.x).max()))
     check("inductive: held-out nodes and all incident edges absent from training graph, seeds 0-9", ok_leak)
     check("inductive: scaler equals a fit on retained raw rows only, seeds 0-9", ok_scaler)
     check("inductive: changing held-out feature values cannot change the retained-node scaler, "
           "training features or validation features (bitwise), seeds 0-9", ok_indep)
     check("inductive: the held-out perturbation was real (inference features did change)", ok_pert)
-    check("inductive: final training features match the protocol-v1 route within float tolerance", ok_same_as_v1,
-          f"max abs difference {worst:.2e}")
+    check("inductive: final training features equal a float64 reference from retained raw rows (within 1e-4), "
+          "seeds 0-9", ok_same_as_v1, f"max abs difference {worst:.2e}")
+    say(f"    informational: distance to the protocol-v1 two-step float32 route {worst_v1:.2e}")
+    RECEIPT["inductive_vs_float64_ref_max_abs"] = worst
+    RECEIPT["inductive_vs_protocol_v1_route_max_abs"] = worst_v1
     src = (ROOT / "fraudshift/inductive_split.py").read_text()
     check("inductive_split.py contains no model code", "models" not in src.replace("model list", ""))
 

@@ -80,8 +80,13 @@ def build_raw_splits(fs, data_dir=None):
 
 
 def fit_scaler(x):
-    """Per-feature mean/std of the rows passed in (features only, no labels)."""
-    mu, sd = x.mean(0), x.std(0)
+    """Per-feature mean/std of the rows passed in (features only, no labels).
+
+    Accumulated in float64. Summing ~1e5 float32 rows column-wise in float32 is off by ~1e-3
+    (measured on Elliptic: sd relative error 8e-4, mean 6e-4); see amendments/AMENDMENT_1.md, correction 5.
+    """
+    mu = x.mean(0, dtype=np.float64)
+    sd = x.std(0, dtype=np.float64)
     sd[sd == 0] = 1.0
     return mu, sd
 

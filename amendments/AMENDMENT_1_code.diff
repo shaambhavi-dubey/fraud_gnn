@@ -67,7 +67,7 @@ index f84bb5c..3bf7285 100644
  
      _, sp = build_splits(C.PRIMARY_FS)
 diff --git a/fraudshift/data.py b/fraudshift/data.py
-index ef56286..35a5e81 100644
+index ef56286..dd91283 100644
 --- a/fraudshift/data.py
 +++ b/fraudshift/data.py
 @@ -27,7 +27,8 @@ class Graph:
@@ -98,14 +98,19 @@ index ef56286..35a5e81 100644
      splits = {
          "train": full.subset(np.isin(full.time, C.TRAIN_STEPS)),
          "val": full.subset(np.isin(full.time, C.VAL_STEPS)),
-@@ -81,6 +78,31 @@ def build_splits(fs, data_dir=None):
+@@ -81,6 +78,36 @@ def build_splits(fs, data_dir=None):
      }
      return full, splits
  
 +
 +def fit_scaler(x):
-+    """Per-feature mean/std of the rows passed in (features only, no labels)."""
-+    mu, sd = x.mean(0), x.std(0)
++    """Per-feature mean/std of the rows passed in (features only, no labels).
++
++    Accumulated in float64. Summing ~1e5 float32 rows column-wise in float32 is off by ~1e-3
++    (measured on Elliptic: sd relative error 8e-4, mean 6e-4); see amendments/AMENDMENT_1.md, correction 5.
++    """
++    mu = x.mean(0, dtype=np.float64)
++    sd = x.std(0, dtype=np.float64)
 +    sd[sd == 0] = 1.0
 +    return mu, sd
 +

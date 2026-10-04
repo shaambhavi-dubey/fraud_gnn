@@ -38,7 +38,8 @@ Protocol section 12 says held-out features are never used in preprocessing. At p
 and `inductive.py` then re-standardized on retained nodes. The final features were algebraically the same,
 but the literal contract was not met. Fix:
 - `data.py` gains `build_raw_splits()` (unstandardized), `fit_scaler()` and `apply_scaler()`;
-  `build_splits()` is rebuilt from them and produces bit-identical output to protocol-v1 (checked by the preflight).
+  `build_splits()` is rebuilt from them. Labels, edges, time steps and node ids are bit-identical to
+  protocol-v1; the standardized features differ only by the scaler-accuracy fix of correction 5.
 - New torch-free `fraudshift/inductive_split.py`: start from unstandardized train-period features, draw the
   hold-out, remove held-out nodes and all their incident edges, fit the scaler ONCE on retained nodes only,
   then apply it to the training graph, the validation graph and the inference graph.
@@ -46,6 +47,25 @@ but the literal contract was not met. Fix:
   thresholding and metrics are unchanged.
 - Check: for every seed 0-9 the preflight perturbs the raw features of the held-out nodes (a copy of the
   data) and verifies that the scaler and the training-graph features are bit-for-bit unchanged.
+
+## Correction 5: scaler accumulated in float64 (found by preflight v2 on the real data)
+Preflight v2 compared the corrected inductive features with the protocol-v1 two-step route and found a
+maximum difference of 0.215 (tolerance 1e-3, a check added by the author, not by the protocol). Diagnosis
+(read-only probes on the real features, `preflight/` diagnostics reported to the reviewer): the cause is float32
+accumulation inside `fit_scaler`. On the 108,950 train-period nodes, `x.std(0)` in float32 has a maximum relative
+error of 7.98e-4 against a float64 reference and `x.mean(0)` a maximum absolute error of 6.36e-4; the same
+computation with a float64 accumulator is exact and column-by-column float32 reduction agrees to 1e-7.
+Some columns have |value| up to about 260, so the standardized values differ by up to about 0.2. Protocol-v1's
+`build_splits()` has the same defect (same arithmetic), so this predates the corrections and affects the temporal
+path as well. It is not leakage: the independence checks pass bitwise.
+Fix: `fit_scaler()` computes mean and standard deviation with `dtype=np.float64`; `apply_scaler()` is unchanged.
+The same function is used by the temporal path and the inductive path, so the two stay consistent. Consequence:
+temporal-path features are no longer bit-identical to protocol-v1; they are closer to the float64 reference.
+Labels, edges, time steps, node ids and every model, threshold and metric are unchanged. No outcome exists.
+Verification (preflight v2): standardized train features equal a float64 reference within 1e-4; the inductive
+training features equal a float64 reference computed from the retained raw rows within 1e-4; the largest
+difference to protocol-v1 and the protocol-v1 scaler error are recorded in the receipt.
+If the reviewer prefers to keep the frozen float32 scaler, this correction can be reverted on its own commit.
 
 ## Correction 4: stale docstring and audit overwrite
 - `Graph.in_degree()` docstring said "Total degree (in + out)"; the code computes in-degree only (as section 9
@@ -56,7 +76,7 @@ but the literal contract was not met. Fix:
 
 ## Exact diff
 `amendments/AMENDMENT_1_code.diff` is `git diff protocol-v1 -- fraudshift` taken at the corrected commit.
-Files touched in `fraudshift/`: check_data.py, data.py, inductive.py, run_seeds.py, and the new inductive_split.py.
+Files touched in `fraudshift/`: check_data.py, data.py (also correction 5), inductive.py, run_seeds.py, and the new inductive_split.py.
 Frozen-behavior files byte-identical to protocol-v1: config.py, models.py, metrics.py, subgroups.py, shifts.py,
 stats.py, plots.py, compute_receipt.py, degree_audit.py, io.py (checked by the preflight).
 

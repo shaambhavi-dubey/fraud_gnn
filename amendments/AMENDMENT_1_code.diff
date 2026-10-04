@@ -1,0 +1,289 @@
+diff --git a/fraudshift/check_data.py b/fraudshift/check_data.py
+index f84bb5c..3bf7285 100644
+--- a/fraudshift/check_data.py
++++ b/fraudshift/check_data.py
+@@ -1,13 +1,43 @@
+ """Step 1: audit the real data BEFORE freezing the protocol. Uses no model outcomes."""
++import hashlib
++import json
++from pathlib import Path
++
+ import numpy as np
+ import pandas as pd
+ 
+ from . import config as C
+ from .data import assign_group, build_splits, load_full
+ 
++# Full 64-character SHA-256 values, appended by amendments/AMENDMENT_1.md
++# (protocol-v1 section 3 lists only truncated prefixes and is left unchanged).
++PINNED_HASHES = Path(__file__).resolve().parent.parent / "amendments" / "pinned_data_hashes.json"
++
++
++def sha256_file(path, chunk=1 << 20):
++    h = hashlib.sha256()
++    with open(path, "rb") as fh:
++        for block in iter(lambda: fh.read(chunk), b""):
++            h.update(block)
++    return h.hexdigest()
++
++
++def verify_hashes(pinned_path=None, data_dir=None):
++    """Fail closed: stop unless every pinned data file matches its full SHA-256."""
++    pinned = json.loads(Path(pinned_path or PINNED_HASHES).read_text())["sha256"]
++    data_dir = Path(data_dir or C.DATA_DIR)
++    for name, want in pinned.items():
++        f = data_dir / name
++        if not f.exists():
++            raise SystemExit(f"FAIL: pinned data file missing: {f}")
++        got = sha256_file(f)
++        print(f"sha256 {name}: {'OK' if got == want.lower() else 'MISMATCH'}")
++        if got != want.lower():
++            raise SystemExit(f"FAIL: SHA-256 mismatch for {name}\n  pinned: {want}\n  actual: {got}")
++
+ 
+ def main():
+-    C.RAW_DIR.mkdir(parents=True, exist_ok=True)
++    verify_hashes()
+     g = load_full()
+     n_edges = g.edge_index.shape[1]
+     print(f"nodes            : {g.n}")
+@@ -27,8 +57,16 @@ def main():
+         rows.append(dict(time_step=int(t), nodes=int(m.sum()), illicit=int((g.y[m] == 1).sum()),
+                          licit=int((g.y[m] == 0).sum()), unknown=int((g.y[m] == -1).sum())))
+     df = pd.DataFrame(rows)
+-    df.to_csv(C.RAW_DIR / "data_audit.csv", index=False)
+-    print("\nper time step (saved to results/raw/data_audit.csv):")
++    # The committed audit is a tracked artifact: compare, never overwrite (fail closed).
++    committed_path = C.RAW_DIR / "data_audit.csv"
++    if not committed_path.exists():
++        raise SystemExit(f"FAIL: committed audit not found: {committed_path}")
++    if not df.equals(pd.read_csv(committed_path)):
++        regen = C.RAW_DIR / "data_audit_regenerated.csv"
++        df.to_csv(regen, index=False)
++        raise SystemExit(f"FAIL: recomputed audit differs from {committed_path}; "
++                         f"regenerated copy written to {regen}, tracked file untouched")
++    print("\nper time step: recomputed audit equals committed results/raw/data_audit.csv")
+     print(df.to_string(index=False))
+ 
+     _, sp = build_splits(C.PRIMARY_FS)
+diff --git a/fraudshift/data.py b/fraudshift/data.py
+index ef56286..35a5e81 100644
+--- a/fraudshift/data.py
++++ b/fraudshift/data.py
+@@ -27,7 +27,8 @@ class Graph:
+         return len(self.y)
+ 
+     def in_degree(self):
+-        """Total degree (in + out) inside this graph."""
++        """In-degree inside this graph: number of parent transactions, i.e. edges whose
++        destination is the node. Out-degree is NOT included (protocol section 9)."""
+         return np.bincount(self.edge_index[1], minlength=self.n)
+ 
+     def subset(self, mask):
+@@ -66,14 +67,10 @@ def load_full(data_dir=None):
+     return Graph(x, y, ei, time, np.arange(len(tx)))
+ 
+ 
+-def build_splits(fs, data_dir=None):
+-    """Standardize using TRAIN-period nodes only, slice the feature set, split by time."""
++def build_raw_splits(fs, data_dir=None):
++    """Feature-set slice split by time, features UNSTANDARDIZED. No scaler is fit here."""
+     full = load_full(data_dir)
+-    x = full.x[:, : C.FEATURE_SETS[fs]]
+-    tr = np.isin(full.time, C.TRAIN_STEPS)
+-    mu, sd = x[tr].mean(0), x[tr].std(0)
+-    sd[sd == 0] = 1.0
+-    full.x = ((x - mu) / sd).astype(np.float32)
++    full.x = full.x[:, : C.FEATURE_SETS[fs]]
+     splits = {
+         "train": full.subset(np.isin(full.time, C.TRAIN_STEPS)),
+         "val": full.subset(np.isin(full.time, C.VAL_STEPS)),
+@@ -81,6 +78,31 @@ def build_splits(fs, data_dir=None):
+     }
+     return full, splits
+ 
++
++def fit_scaler(x):
++    """Per-feature mean/std of the rows passed in (features only, no labels)."""
++    mu, sd = x.mean(0), x.std(0)
++    sd[sd == 0] = 1.0
++    return mu, sd
++
++
++def apply_scaler(x, scaler):
++    mu, sd = scaler
++    return ((x - mu) / sd).astype(np.float32)
++
++
++def build_splits(fs, data_dir=None):
++    """Standardize using TRAIN-period nodes only, slice the feature set, split by time."""
++    full, raw = build_raw_splits(fs, data_dir)
++    scaler = fit_scaler(raw["train"].x)
++    full.x = apply_scaler(full.x, scaler)
++    splits = {}
++    for name, g in raw.items():
++        g.x = apply_scaler(g.x, scaler)
++        splits[name] = g
++    return full, splits
++
++
+ def assign_group(indeg):
+     """Fixed bins from config: 0 = in-degree 0, 1 = in-degree 1, 2 = in-degree 2 or more."""
+     return np.where(indeg <= C.GROUP_CUTS[0], 0, np.where(indeg <= C.GROUP_CUTS[1], 1, 2))
+diff --git a/fraudshift/inductive.py b/fraudshift/inductive.py
+index c594f28..81ab4e1 100644
+--- a/fraudshift/inductive.py
++++ b/fraudshift/inductive.py
+@@ -2,62 +2,35 @@
+ 
+ For each seed: hold out 20% of LABELED train-period nodes (stratified).
+   training graph : held-out nodes and ALL their edges removed; held-out labels never used
++  scaler         : fit once on the retained nodes only, starting from UNSTANDARDIZED features
+   inference graph: held-out nodes added back with edges ONLY to retained train-period nodes
+                    (held-out <-> held-out edges dropped; no val/test edges exist here)
++Split construction lives in inductive_split.py (no model code); see amendments/AMENDMENT_1.md.
+ """
+-import numpy as np
+ import pandas as pd
+ 
+ from . import config as C
+-from .data import Graph, build_splits
++from .data import build_raw_splits
++from .inductive_split import make_inductive_split, stratified_holdout  # noqa: F401
+ from .metrics import choose_threshold, compute
+ from .models import fit_and_score
+ 
+ 
+-def stratified_holdout(rng, y, frac):
+-    held = []
+-    for cls in (0, 1):
+-        idx = np.flatnonzero(y == cls)
+-        held.append(rng.choice(idx, int(round(frac * len(idx))), replace=False))
+-    return np.concatenate(held)
+-
+-
+ def main():
+     C.RAW_DIR.mkdir(parents=True, exist_ok=True)
+-    _, g = build_splits(C.PRIMARY_FS)
+-    gt, gv = g["train"], g["val"]
+-    lv = gv.y >= 0
++    _, raw = build_raw_splits(C.PRIMARY_FS)
++    raw_tr, raw_val = raw["train"], raw["val"]
++    lv = raw_val.y >= 0
+     rows = []
+     for seed in C.SEEDS:
+-        rng = np.random.default_rng(1000 + seed)          # same hold-out for every model
+-        held = stratified_holdout(rng, gt.y, C.INDUCTIVE_HOLDOUT)
+-        held_mask = np.zeros(gt.n, dtype=bool)
+-        held_mask[held] = True
+-
+-        g_tr = gt.subset(~held_mask)
+-        # leakage checks
+-        assert not np.isin(g_tr.node_idx, gt.node_idx[held]).any(), "held-out node in training graph"
+-        assert g_tr.n == gt.n - len(held)
+-        assert g_tr.edge_index.max(initial=-1) < g_tr.n
+-
+-                # re-standardize using RETAINED nodes only, so held-out features never influence preprocessing
+-        m = g_tr.x.mean(0)
+-        s = g_tr.x.std(0)
+-        s[s == 0] = 1.0
+-        g_tr.x = ((g_tr.x - m) / s).astype(np.float32)
+-        gv_s = Graph(((gv.x - m) / s).astype(np.float32), gv.y, gv.edge_index, gv.time, gv.node_idx)
+-
+-        ei = gt.edge_index
+-        keep = ~(held_mask[ei[0]] & held_mask[ei[1]])      # drop held<->held edges
+-        g_inf = Graph(((gt.x - m) / s).astype(np.float32), gt.y, ei[:, keep], gt.time, gt.node_idx)
+-
++        sp = make_inductive_split(raw_tr, raw_val, seed)
+         for model in C.MODELS:
+-            sv, (s_inf,) = fit_and_score(model, seed, g_tr, gv_s, [g_inf])
+-            thr = choose_threshold(gv.y[lv], sv[lv])       # validation only
+-            m = compute(gt.y[held], s_inf[held], thr)
++            sv, (s_inf,) = fit_and_score(model, seed, sp.g_train, sp.g_val, [sp.g_infer])
++            thr = choose_threshold(raw_val.y[lv], sv[lv])       # validation only
++            r = compute(raw_tr.y[sp.held], s_inf[sp.held], thr)
+             rows.append(dict(seed=seed, model=model, feature_set=C.PRIMARY_FS,
+-                             n_heldout=len(held), threshold=thr, **m))
+-            print(f"inductive {model:9s} seed={seed} aucpr={m['aucpr']:.4f}", flush=True)
++                             n_heldout=len(sp.held), threshold=thr, **r))
++            print(f"inductive {model:9s} seed={seed} aucpr={r['aucpr']:.4f}", flush=True)
+     pd.DataFrame(rows).to_csv(C.RAW_DIR / "inductive_metrics.csv", index=False)
+     print("wrote inductive_metrics.csv")
+ 
+diff --git a/fraudshift/inductive_split.py b/fraudshift/inductive_split.py
+new file mode 100644
+index 0000000..836a8c0
+--- /dev/null
++++ b/fraudshift/inductive_split.py
+@@ -0,0 +1,59 @@
++"""Strict inductive split construction (protocol section 12). No model code is imported here.
++
++Order of operations (pre-run correction, see amendments/AMENDMENT_1.md):
++  1. start from UNSTANDARDIZED train-period and validation features
++  2. draw the stratified hold-out of labeled train-period nodes
++  3. remove held-out nodes and ALL their incident edges  -> training graph
++  4. fit the scaler ONCE on the retained nodes only
++  5. apply that scaler to the training graph, the validation graph and the inference graph
++"""
++from dataclasses import dataclass
++
++import numpy as np
++
++from . import config as C
++from .data import Graph, apply_scaler, fit_scaler
++
++
++def stratified_holdout(rng, y, frac):
++    held = []
++    for cls in (0, 1):
++        idx = np.flatnonzero(y == cls)
++        held.append(rng.choice(idx, int(round(frac * len(idx))), replace=False))
++    return np.concatenate(held)
++
++
++@dataclass
++class InductiveSplit:
++    held: np.ndarray        # local indices (into the raw train graph) of held-out nodes
++    scaler: tuple           # (mean, std) fit on retained nodes only
++    g_train: Graph          # held-out nodes and all incident edges removed, scaled
++    g_val: Graph            # validation graph, scaled with the retained-node scaler
++    g_infer: Graph          # train-period graph, held<->held edges dropped, scaled
++
++
++def make_inductive_split(raw_train, raw_val, seed):
++    rng = np.random.default_rng(1000 + seed)          # same hold-out for every model
++    held = stratified_holdout(rng, raw_train.y, C.INDUCTIVE_HOLDOUT)
++    held_mask = np.zeros(raw_train.n, dtype=bool)
++    held_mask[held] = True
++
++    g_tr = raw_train.subset(~held_mask)                # raw (unscaled) retained graph
++    # leakage checks
++    assert (raw_train.y[held] >= 0).all(), "unlabeled node in hold-out"
++    assert not np.isin(g_tr.node_idx, raw_train.node_idx[held]).any(), "held-out node in training graph"
++    assert g_tr.n == raw_train.n - len(held)
++    assert g_tr.edge_index.max(initial=-1) < g_tr.n
++    s, d = raw_train.edge_index
++    assert g_tr.edge_index.shape[1] == raw_train.edge_index.shape[1] - int((held_mask[s] | held_mask[d]).sum()), \
++        "an edge incident to a held-out node survived in the training graph"
++
++    scaler = fit_scaler(g_tr.x)                        # RETAINED nodes only, fit once
++    g_tr.x = apply_scaler(g_tr.x, scaler)
++    g_val = Graph(apply_scaler(raw_val.x, scaler), raw_val.y, raw_val.edge_index,
++                  raw_val.time, raw_val.node_idx)
++
++    keep = ~(held_mask[s] & held_mask[d])              # drop held<->held edges only
++    g_inf = Graph(apply_scaler(raw_train.x, scaler), raw_train.y, raw_train.edge_index[:, keep],
++                  raw_train.time, raw_train.node_idx)
++    return InductiveSplit(held, scaler, g_tr, g_val, g_inf)
+diff --git a/fraudshift/run_seeds.py b/fraudshift/run_seeds.py
+index 6043ba0..a122516 100644
+--- a/fraudshift/run_seeds.py
++++ b/fraudshift/run_seeds.py
+@@ -20,7 +20,6 @@ def train_all():
+         lab = gte.y >= 0
+         indeg = gte.in_degree()
+         lv = gv.y >= 0
+-        time= gte.time[lab], indeg=indeg[lab]
+         for model in C.MODELS:
+             for seed in C.SEEDS:
+                 out = C.SCORES_DIR / f"{model}_{fs}_seed{seed}.npz"

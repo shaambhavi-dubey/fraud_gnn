@@ -1,0 +1,8 @@
+{
+  "note": "Full SHA-256 values captured by preflight-v1 (commit f7d016b, preflight/preflight_receipt.json). Append-only amendment to protocol-v1 section 3; see AMENDMENT_1.md.",
+  "sha256": {
+    "elliptic_txs_features.csv": "fd7f83573443c9e302e371d3f110e3b6224160f5d1ed8a287757936127800ff0",
+    "elliptic_txs_classes.csv": "93e2e7b2405c735ba752bf6ba06b947561deddd1f5a8fc91e46f6a4c0e439493",
+    "elliptic_txs_edgelist.csv": "a35053ba68a98e4382cae2ba65b9d9e36b23b6439e02dff084971b1b72a5156e"
+  }
+}

@@ -20,7 +20,6 @@ def train_all():
         lab = gte.y >= 0
         indeg = gte.in_degree()
         lv = gv.y >= 0
-        time= gte.time[lab], indeg=indeg[lab]
         for model in C.MODELS:
             for seed in C.SEEDS:
                 out = C.SCORES_DIR / f"{model}_{fs}_seed{seed}.npz"

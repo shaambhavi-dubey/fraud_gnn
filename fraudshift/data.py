@@ -27,7 +27,8 @@ class Graph:
         return len(self.y)
 
     def in_degree(self):
-        """Total degree (in + out) inside this graph."""
+        """In-degree inside this graph: number of parent transactions, i.e. edges whose
+        destination is the node. Out-degree is NOT included (protocol section 9)."""
         return np.bincount(self.edge_index[1], minlength=self.n)
 
     def subset(self, mask):
@@ -66,20 +67,41 @@ def load_full(data_dir=None):
     return Graph(x, y, ei, time, np.arange(len(tx)))
 
 
-def build_splits(fs, data_dir=None):
-    """Standardize using TRAIN-period nodes only, slice the feature set, split by time."""
+def build_raw_splits(fs, data_dir=None):
+    """Feature-set slice split by time, features UNSTANDARDIZED. No scaler is fit here."""
     full = load_full(data_dir)
-    x = full.x[:, : C.FEATURE_SETS[fs]]
-    tr = np.isin(full.time, C.TRAIN_STEPS)
-    mu, sd = x[tr].mean(0), x[tr].std(0)
-    sd[sd == 0] = 1.0
-    full.x = ((x - mu) / sd).astype(np.float32)
+    full.x = full.x[:, : C.FEATURE_SETS[fs]]
     splits = {
         "train": full.subset(np.isin(full.time, C.TRAIN_STEPS)),
         "val": full.subset(np.isin(full.time, C.VAL_STEPS)),
         "test": full.subset(np.isin(full.time, C.TEST_STEPS)),
     }
     return full, splits
+
+
+def fit_scaler(x):
+    """Per-feature mean/std of the rows passed in (features only, no labels)."""
+    mu, sd = x.mean(0), x.std(0)
+    sd[sd == 0] = 1.0
+    return mu, sd
+
+
+def apply_scaler(x, scaler):
+    mu, sd = scaler
+    return ((x - mu) / sd).astype(np.float32)
+
+
+def build_splits(fs, data_dir=None):
+    """Standardize using TRAIN-period nodes only, slice the feature set, split by time."""
+    full, raw = build_raw_splits(fs, data_dir)
+    scaler = fit_scaler(raw["train"].x)
+    full.x = apply_scaler(full.x, scaler)
+    splits = {}
+    for name, g in raw.items():
+        g.x = apply_scaler(g.x, scaler)
+        splits[name] = g
+    return full, splits
+
 
 def assign_group(indeg):
     """Fixed bins from config: 0 = in-degree 0, 1 = in-degree 1, 2 = in-degree 2 or more."""

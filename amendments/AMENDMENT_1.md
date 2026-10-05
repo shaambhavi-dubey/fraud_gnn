@@ -62,9 +62,15 @@ Fix: `fit_scaler()` computes mean and standard deviation with `dtype=np.float64`
 The same function is used by the temporal path and the inductive path, so the two stay consistent. Consequence:
 temporal-path features are no longer bit-identical to protocol-v1; they are closer to the float64 reference.
 Labels, edges, time steps, node ids and every model, threshold and metric are unchanged. No outcome exists.
-Verification (preflight v2): standardized train features equal a float64 reference within 1e-4; the inductive
-training features equal a float64 reference computed from the retained raw rows within 1e-4; the largest
-difference to protocol-v1 and the protocol-v1 scaler error are recorded in the receipt.
+Measured on the real data by preflight v2: over the train, validation and test features of the temporal path,
+protocol-v1's float32 scaler differs from the float64 reference by up to 2.04 standardized units (heavy-tailed
+columns reach |value| in the thousands); the corrected scaler differs by 1.7e-4, which is float32 output rounding at
+that magnitude (about 6e-8 relative). Verification (preflight v2): standardized features of the temporal path and the
+inductive training features equal a float64 reference within float32 rounding (rtol 1e-6, atol 1e-6), a bound about
+1000 times tighter than the protocol-v1 scaler error; the largest differences and the distance to protocol-v1 are
+recorded in the receipt. The first version of this check used an absolute bound of 1e-4, which float32 storage cannot
+meet at |value| in the thousands; it was replaced by the relative bound after preflight v2 showed this, and the
+change is recorded here and in its own commit.
 If the reviewer prefers to keep the frozen float32 scaler, this correction can be reverted on its own commit.
 
 ## Correction 4: stale docstring and audit overwrite

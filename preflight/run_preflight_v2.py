@@ -40,6 +40,10 @@ FROZEN_FILES = ["PROTOCOL.md", "fraudshift/config.py", "fraudshift/models.py", "
 ALLOWED_CHANGED = {"fraudshift/check_data.py", "fraudshift/data.py", "fraudshift/inductive.py",
                    "fraudshift/inductive_split.py", "fraudshift/run_seeds.py", "README.md", "run_all.sh"}
 ALLOWED_PREFIXES = ("amendments/", "preflight/")
+# The final features are stored as float32, so even a perfect float64 computation is rounded to ~6e-8 * |value|.
+# Heavy-tailed validation/test columns reach |value| in the thousands, so an absolute 1e-4 bound is too tight;
+# the protocol-v1 float32 scaler error is ~1e-3 relative, so these tolerances are ~1000x stricter than needed.
+FLOAT32_RTOL, FLOAT32_ATOL = 1e-6, 1e-6
 EXPECTED_ORDER = ["check_data", "run_seeds", "subgroups", "shifts", "inductive", "stats", "plots",
                   "compute_receipt"]
 OUTCOME_CSVS = {"per_seed_metrics.csv", "per_group_metrics.csv", "shift_metrics.csv", "inductive_metrics.csv",
@@ -222,18 +226,24 @@ def old_vs_new_check():
                 tr64 = raw_sp["train"].x.astype(np.float64)
                 m64, s64 = tr64.mean(0), tr64.std(0)
                 s64[s64 == 0] = 1.0
-                worst_new = worst_old = worst_gap = 0.0
+                worst_new = worst_old = worst_gap = max_ref = max_rel = 0.0
+                close = True
                 for k in b:
                     ref = ((raw_sp[k].x.astype(np.float64) - m64) / s64)
                     worst_new = max(worst_new, float(np.abs(b[k].x - ref).max()))
                     worst_old = max(worst_old, float(np.abs(a[k].x - ref).max()))
                     worst_gap = max(worst_gap, float(np.abs(b[k].x - a[k].x).max()))
-                check(f"[{fs}] standardized features equal the float64 reference within 1e-4", worst_new < 1e-4,
-                      f"max abs diff {worst_new:.2e}")
+                    max_ref = max(max_ref, float(np.abs(ref).max()))
+                    max_rel = max(max_rel, float((np.abs(b[k].x - ref) / np.maximum(np.abs(ref), 1.0)).max()))
+                    close &= bool(np.allclose(b[k].x, ref, rtol=FLOAT32_RTOL, atol=FLOAT32_ATOL, equal_nan=False))
+                check(f"[{fs}] standardized features equal the float64 reference within float32 rounding "
+                      f"(rtol {FLOAT32_RTOL:g}, atol {FLOAT32_ATOL:g})", close,
+                      f"max abs diff {worst_new:.2e} at max |value| {max_ref:.0f}; max relative diff {max_rel:.2e}")
                 say(f"    [{fs}] protocol-v1 float32 scaler: max abs diff to float64 reference {worst_old:.2e}; "
                     f"new vs protocol-v1: {worst_gap:.2e}")
                 RECEIPT.setdefault("scaler_precision", {})[fs] = dict(
-                    new_vs_float64=worst_new, protocol_v1_vs_float64=worst_old, new_vs_protocol_v1=worst_gap)
+                    new_vs_float64=worst_new, protocol_v1_vs_float64=worst_old, new_vs_protocol_v1=worst_gap,
+                    max_abs_standardized_value=max_ref, new_max_relative_diff=max_rel)
                 sds = raw_sp["train"].x.std(0, dtype=np.float64)
                 check(f"[{fs}] no zero or near-constant feature column in the train period (min sd > 1e-6)",
                       float(sds.min()) > 1e-6, f"min sd {float(sds.min()):.3e}")
@@ -273,7 +283,7 @@ def inductive_check():
         s64[s64 == 0] = 1.0
         d = float(np.abs(sp.g_train.x - (r64 - r64.mean(0)) / s64).max())
         worst = max(worst, d)
-        ok_same_as_v1 &= d < 1e-4
+        ok_same_as_v1 &= bool(np.allclose(sp.g_train.x, (r64 - r64.mean(0)) / s64, rtol=FLOAT32_RTOL, atol=FLOAT32_ATOL))
         # informational: distance to the protocol-v1 two-step float32 route
         xs = std["train"].x[~mask]
         m1, s1 = xs.mean(0), xs.std(0)
@@ -284,8 +294,9 @@ def inductive_check():
     check("inductive: changing held-out feature values cannot change the retained-node scaler, "
           "training features or validation features (bitwise), seeds 0-9", ok_indep)
     check("inductive: the held-out perturbation was real (inference features did change)", ok_pert)
-    check("inductive: final training features equal a float64 reference from retained raw rows (within 1e-4), "
-          "seeds 0-9", ok_same_as_v1, f"max abs difference {worst:.2e}")
+    check("inductive: final training features equal a float64 reference from retained raw rows "
+          f"(within float32 rounding, rtol {FLOAT32_RTOL:g}, atol {FLOAT32_ATOL:g}), seeds 0-9",
+          ok_same_as_v1, f"max abs difference {worst:.2e}")
     say(f"    informational: distance to the protocol-v1 two-step float32 route {worst_v1:.2e}")
     RECEIPT["inductive_vs_float64_ref_max_abs"] = worst
     RECEIPT["inductive_vs_protocol_v1_route_max_abs"] = worst_v1

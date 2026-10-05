@@ -1,0 +1,84 @@
+== 1. environment and dependency lock
+[PASS] installed packages match requirements-lock.txt -- 0 mismatches
+== 2. full SHA-256 values (amendment) and fail-closed data check
+[PASS] pinned file has three full 64-hex digests
+[PASS] pinned digests equal those captured by preflight-v1 receipt
+[PASS] each protocol-v1 truncated hash is a prefix of the pinned full digest
+[PASS] data files on disk match the pinned full digests
+[PASS] verify_hashes exits non-zero on a wrong digest
+[PASS] verify_hashes exits non-zero on a missing file
+== 3. check_data runs end to end without touching the tracked audit
+[PASS] check_data.main() completes (hashes verified, audit equals committed)
+[PASS] tracked results/raw/data_audit.csv bytes unchanged by check_data
+[PASS] no data_audit_regenerated.csv was produced
+[PASS] check_data fails closed on an audit mismatch
+[PASS] on mismatch the committed file is untouched and a separate regenerated copy is written
+[PASS] tracked audit still unchanged after the negative test
+== 4. data counts, temporal splits, subgroups (structure only)
+[PASS] full-data counts match protocol section 3 -- got={'nodes': 203769, 'edges': 234355, 'illicit': 4545, 'licit': 42019, 'unknown': 157205}
+[PASS] 0 edges cross time steps
+[PASS] [all165] train labeled illicit/licit match section 4 -- got=(2219, 21387)
+[PASS] [all165] train edge indices valid
+[PASS] [all165] val labeled illicit/licit match section 4 -- got=(1243, 5045)
+[PASS] [all165] val edge indices valid
+[PASS] [all165] test labeled illicit/licit match section 4 -- got=(1083, 15587)
+[PASS] [all165] test edge indices valid
+[PASS] [all165] splits cover the stated time steps
+[PASS] [all165] node ids disjoint across splits
+[PASS] [all165] train features standardized on train period
+[PASS] [local93] train edge indices valid
+[PASS] [local93] val edge indices valid
+[PASS] [local93] test edge indices valid
+[PASS] [local93] splits cover the stated time steps
+[PASS] [local93] node ids disjoint across splits
+[PASS] [local93] train features standardized on train period
+[PASS] train subgroup sizes match protocol section 9 -- got={'in0': (7405, 582), 'in1': (10710, 1559), 'in2plus': (5491, 78)}
+[PASS] in_degree() equals in-degree only
+[PASS] in_degree() docstring no longer claims total degree
+    window 35-42: illicit test nodes = 914 (underpowered if < 30)
+    window 43-49: illicit test nodes = 169 (underpowered if < 30)
+== 5. build_splits(): structure identical to protocol-v1, scaler accurate (correction 5)
+[PASS] [all165] labels, edges, time steps, node ids identical to protocol-v1 build_splits
+[PASS] [all165] standardized features equal the float64 reference within float32 rounding (rtol 1e-06, atol 1e-06) -- max abs diff 1.70e-04 at max |value| 6494; max relative diff 5.95e-08
+    [all165] protocol-v1 float32 scaler: max abs diff to float64 reference 2.04e+00; new vs protocol-v1: 2.04e+00
+[PASS] [all165] no zero or near-constant feature column in the train period (min sd > 1e-6) -- min sd 4.434e-02
+[PASS] [local93] labels, edges, time steps, node ids identical to protocol-v1 build_splits
+[PASS] [local93] standardized features equal the float64 reference within float32 rounding (rtol 1e-06, atol 1e-06) -- max abs diff 1.70e-04 at max |value| 6494; max relative diff 5.94e-08
+    [local93] protocol-v1 float32 scaler: max abs diff to float64 reference 2.04e+00; new vs protocol-v1: 2.04e+00
+[PASS] [local93] no zero or near-constant feature column in the train period (min sd > 1e-6) -- min sd 4.434e-02
+== 6. strict inductive split: scaler fit once on retained nodes, independent of held-out features
+[PASS] inductive: held-out nodes and all incident edges absent from training graph, seeds 0-9
+[PASS] inductive: scaler equals a fit on retained raw rows only, seeds 0-9
+[PASS] inductive: changing held-out feature values cannot change the retained-node scaler, training features or validation features (bitwise), seeds 0-9
+[PASS] inductive: the held-out perturbation was real (inference features did change)
+[PASS] inductive: final training features equal a float64 reference from retained raw rows (within float32 rounding, rtol 1e-06, atol 1e-06), seeds 0-9 -- max abs difference 7.62e-06
+    informational: distance to the protocol-v1 two-step float32 route 1.50e-01
+[PASS] inductive_split.py contains no model code
+== 7. frozen files, allowed changes, fit boundary, outcome files untouched
+[PASS] PROTOCOL.md byte-identical to protocol-v1
+[PASS] fraudshift/config.py byte-identical to protocol-v1
+[PASS] fraudshift/models.py byte-identical to protocol-v1
+[PASS] fraudshift/metrics.py byte-identical to protocol-v1
+[PASS] fraudshift/subgroups.py byte-identical to protocol-v1
+[PASS] fraudshift/shifts.py byte-identical to protocol-v1
+[PASS] fraudshift/stats.py byte-identical to protocol-v1
+[PASS] fraudshift/plots.py byte-identical to protocol-v1
+[PASS] fraudshift/compute_receipt.py byte-identical to protocol-v1
+[PASS] fraudshift/degree_audit.py byte-identical to protocol-v1
+[PASS] fraudshift/io.py byte-identical to protocol-v1
+[PASS] fraudshift/__init__.py byte-identical to protocol-v1
+[PASS] only allowed files differ from protocol-v1 -- unexpected: []
+[PASS] working tree clean except preflight/ outputs (receipt belongs to committed code) -- []
+[PASS] run_all.sh order unchanged -- ['check_data', 'run_seeds', 'subgroups', 'shifts', 'inductive', 'stats', 'plots', 'compute_receipt']
+[PASS] module check_data compiles
+[PASS] module run_seeds compiles
+[PASS] module subgroups compiles
+[PASS] module shifts compiles
+[PASS] module inductive compiles
+[PASS] module stats compiles
+[PASS] module plots compiles
+[PASS] module compute_receipt compiles
+[PASS] run_seeds.py does not overwrite the imported `time` module -- lines []
+[PASS] first fit happens in run_seeds, which is not executed here
+[PASS] amendments/AMENDMENT_1_code.diff equals git diff protocol-v1 -- fraudshift
+[PASS] no outcome-bearing files exist (listed by name only, none opened) -- []

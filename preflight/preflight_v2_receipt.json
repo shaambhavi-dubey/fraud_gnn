@@ -1,0 +1,398 @@
+{
+  "environment": {
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "lock_vs_installed_mismatch": {}
+  },
+  "checks": {
+    "installed packages match requirements-lock.txt": {
+      "pass": true,
+      "detail": "0 mismatches"
+    },
+    "pinned file has three full 64-hex digests": {
+      "pass": true,
+      "detail": ""
+    },
+    "pinned digests equal those captured by preflight-v1 receipt": {
+      "pass": true,
+      "detail": ""
+    },
+    "each protocol-v1 truncated hash is a prefix of the pinned full digest": {
+      "pass": true,
+      "detail": ""
+    },
+    "data files on disk match the pinned full digests": {
+      "pass": true,
+      "detail": ""
+    },
+    "verify_hashes exits non-zero on a wrong digest": {
+      "pass": true,
+      "detail": ""
+    },
+    "verify_hashes exits non-zero on a missing file": {
+      "pass": true,
+      "detail": ""
+    },
+    "check_data.main() completes (hashes verified, audit equals committed)": {
+      "pass": true,
+      "detail": ""
+    },
+    "tracked results/raw/data_audit.csv bytes unchanged by check_data": {
+      "pass": true,
+      "detail": ""
+    },
+    "no data_audit_regenerated.csv was produced": {
+      "pass": true,
+      "detail": ""
+    },
+    "check_data fails closed on an audit mismatch": {
+      "pass": true,
+      "detail": ""
+    },
+    "on mismatch the committed file is untouched and a separate regenerated copy is written": {
+      "pass": true,
+      "detail": ""
+    },
+    "tracked audit still unchanged after the negative test": {
+      "pass": true,
+      "detail": ""
+    },
+    "full-data counts match protocol section 3": {
+      "pass": true,
+      "detail": "got={'nodes': 203769, 'edges': 234355, 'illicit': 4545, 'licit': 42019, 'unknown': 157205}"
+    },
+    "0 edges cross time steps": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] train labeled illicit/licit match section 4": {
+      "pass": true,
+      "detail": "got=(2219, 21387)"
+    },
+    "[all165] train edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] val labeled illicit/licit match section 4": {
+      "pass": true,
+      "detail": "got=(1243, 5045)"
+    },
+    "[all165] val edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] test labeled illicit/licit match section 4": {
+      "pass": true,
+      "detail": "got=(1083, 15587)"
+    },
+    "[all165] test edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] splits cover the stated time steps": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] node ids disjoint across splits": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] train features standardized on train period": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] train edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] val edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] test edge indices valid": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] splits cover the stated time steps": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] node ids disjoint across splits": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] train features standardized on train period": {
+      "pass": true,
+      "detail": ""
+    },
+    "train subgroup sizes match protocol section 9": {
+      "pass": true,
+      "detail": "got={'in0': (7405, 582), 'in1': (10710, 1559), 'in2plus': (5491, 78)}"
+    },
+    "in_degree() equals in-degree only": {
+      "pass": true,
+      "detail": ""
+    },
+    "in_degree() docstring no longer claims total degree": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] labels, edges, time steps, node ids identical to protocol-v1 build_splits": {
+      "pass": true,
+      "detail": ""
+    },
+    "[all165] standardized features equal the float64 reference within float32 rounding (rtol 1e-06, atol 1e-06)": {
+      "pass": true,
+      "detail": "max abs diff 1.70e-04 at max |value| 6494; max relative diff 5.95e-08"
+    },
+    "[all165] no zero or near-constant feature column in the train period (min sd > 1e-6)": {
+      "pass": true,
+      "detail": "min sd 4.434e-02"
+    },
+    "[local93] labels, edges, time steps, node ids identical to protocol-v1 build_splits": {
+      "pass": true,
+      "detail": ""
+    },
+    "[local93] standardized features equal the float64 reference within float32 rounding (rtol 1e-06, atol 1e-06)": {
+      "pass": true,
+      "detail": "max abs diff 1.70e-04 at max |value| 6494; max relative diff 5.94e-08"
+    },
+    "[local93] no zero or near-constant feature column in the train period (min sd > 1e-6)": {
+      "pass": true,
+      "detail": "min sd 4.434e-02"
+    },
+    "inductive: held-out nodes and all incident edges absent from training graph, seeds 0-9": {
+      "pass": true,
+      "detail": ""
+    },
+    "inductive: scaler equals a fit on retained raw rows only, seeds 0-9": {
+      "pass": true,
+      "detail": ""
+    },
+    "inductive: changing held-out feature values cannot change the retained-node scaler, training features or validation features (bitwise), seeds 0-9": {
+      "pass": true,
+      "detail": ""
+    },
+    "inductive: the held-out perturbation was real (inference features did change)": {
+      "pass": true,
+      "detail": ""
+    },
+    "inductive: final training features equal a float64 reference from retained raw rows (within float32 rounding, rtol 1e-06, atol 1e-06), seeds 0-9": {
+      "pass": true,
+      "detail": "max abs difference 7.62e-06"
+    },
+    "inductive_split.py contains no model code": {
+      "pass": true,
+      "detail": ""
+    },
+    "PROTOCOL.md byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/config.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/models.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/metrics.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/subgroups.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/shifts.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/stats.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/plots.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/compute_receipt.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/degree_audit.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/io.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "fraudshift/__init__.py byte-identical to protocol-v1": {
+      "pass": true,
+      "detail": ""
+    },
+    "only allowed files differ from protocol-v1": {
+      "pass": true,
+      "detail": "unexpected: []"
+    },
+    "working tree clean except preflight/ outputs (receipt belongs to committed code)": {
+      "pass": true,
+      "detail": "[]"
+    },
+    "run_all.sh order unchanged": {
+      "pass": true,
+      "detail": "['check_data', 'run_seeds', 'subgroups', 'shifts', 'inductive', 'stats', 'plots', 'compute_receipt']"
+    },
+    "module check_data compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module run_seeds compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module subgroups compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module shifts compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module inductive compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module stats compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module plots compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "module compute_receipt compiles": {
+      "pass": true,
+      "detail": ""
+    },
+    "run_seeds.py does not overwrite the imported `time` module": {
+      "pass": true,
+      "detail": "lines []"
+    },
+    "first fit happens in run_seeds, which is not executed here": {
+      "pass": true,
+      "detail": ""
+    },
+    "amendments/AMENDMENT_1_code.diff equals git diff protocol-v1 -- fraudshift": {
+      "pass": true,
+      "detail": ""
+    },
+    "no outcome-bearing files exist (listed by name only, none opened)": {
+      "pass": true,
+      "detail": "[]"
+    }
+  },
+  "data_sha256_full": {
+    "elliptic_txs_features.csv": "fd7f83573443c9e302e371d3f110e3b6224160f5d1ed8a287757936127800ff0",
+    "elliptic_txs_classes.csv": "93e2e7b2405c735ba752bf6ba06b947561deddd1f5a8fc91e46f6a4c0e439493",
+    "elliptic_txs_edgelist.csv": "a35053ba68a98e4382cae2ba65b9d9e36b23b6439e02dff084971b1b72a5156e"
+  },
+  "group_sizes_nodes_illicit": {
+    "train": {
+      "in0": [
+        7405,
+        582
+      ],
+      "in1": [
+        10710,
+        1559
+      ],
+      "in2plus": [
+        5491,
+        78
+      ]
+    },
+    "val": {
+      "in0": [
+        1935,
+        317
+      ],
+      "in1": [
+        3590,
+        884
+      ],
+      "in2plus": [
+        763,
+        42
+      ]
+    },
+    "test": {
+      "in0": [
+        5816,
+        306
+      ],
+      "in1": [
+        8499,
+        722
+      ],
+      "in2plus": [
+        2355,
+        55
+      ]
+    }
+  },
+  "window_illicit_counts": {
+    "35-42": 914,
+    "43-49": 169
+  },
+  "scaler_precision": {
+    "all165": {
+      "new_vs_float64": 0.00016977356062852778,
+      "protocol_v1_vs_float64": 2.0432872576893715,
+      "new_vs_protocol_v1": 2.04345703125,
+      "max_abs_standardized_value": 6493.637865086061,
+      "new_max_relative_diff": 5.954902491884344e-08
+    },
+    "local93": {
+      "new_vs_float64": 0.00016977356062852778,
+      "protocol_v1_vs_float64": 2.0432872576893715,
+      "new_vs_protocol_v1": 2.04345703125,
+      "max_abs_standardized_value": 6493.637865086061,
+      "new_max_relative_diff": 5.9396452040154996e-08
+    }
+  },
+  "inductive_vs_float64_ref_max_abs": 7.6199789020847675e-06,
+  "inductive_vs_protocol_v1_route_max_abs": 0.1500244140625,
+  "changed_vs_protocol_v1": [
+    "README.md",
+    "amendments/AMENDMENT_1.md",
+    "amendments/AMENDMENT_1_code.diff",
+    "amendments/pinned_data_hashes.json",
+    "fraudshift/check_data.py",
+    "fraudshift/data.py",
+    "fraudshift/inductive.py",
+    "fraudshift/inductive_split.py",
+    "fraudshift/run_seeds.py",
+    "preflight/diagnose_inductive_numerics.py",
+    "preflight/preflight_log.txt",
+    "preflight/preflight_receipt.json",
+    "preflight/preflight_v2_log.txt",
+    "preflight/preflight_v2_receipt.json",
+    "preflight/probe_scaler_precision.py",
+    "preflight/run_preflight.py",
+    "preflight/run_preflight_v2.py",
+    "run_all.sh"
+  ],
+  "results_raw_listing": [
+    "data_audit.csv"
+  ],
+  "git": {
+    "head": "b57f61a4f484f8cb760f19b4af9e32aa4acf2993",
+    "protocol_tag": "633487f35cc8946ed945acb599bb0f186ba2db16",
+    "preflight_v1_commit": "f7d016b2fb7e5ec12b9d8b6e5db3af3683ec3f44"
+  },
+  "amendment_sha256": "6870eeef7680b1fa6021be9fcae6f8c0b0e6e6886618bc60d43709f13b988011",
+  "no_outcome_statement": "No model was fit and no metric, loss or prediction was produced; no outcome-bearing file was opened."
+}

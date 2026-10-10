@@ -1,0 +1,47 @@
+stage=run_seeds start=2026-10-05T18:36:27+00:00 head=df2ca3947f6a822b89080621e2cd85f431d8033d exec_commit=b57f61a4f484f8cb760f19b4af9e32aa4acf2993
+python=3.14.5 platform=Windows-11-10.0.26300-SP0
+C:\Users\hp\Downloads\fraud-shift-study\fraud-shift-study\.venv\Lib\site-packages\torch\jit\_script.py:1485: FutureWarning: `torch.jit.script` is not supported in Python 3.14+ and may break. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+graphsage all165   seed=7 val_aucpr=0.9207 thr=0.927 (170s)
+graphsage all165   seed=8 val_aucpr=0.9336 thr=0.818 (240s)
+graphsage all165   seed=9 val_aucpr=0.9262 thr=0.744 (221s)
+xgboost   local93  seed=0 val_aucpr=0.9833 thr=0.653 (4s)
+xgboost   local93  seed=1 val_aucpr=0.9820 thr=0.601 (4s)
+xgboost   local93  seed=2 val_aucpr=0.9836 thr=0.499 (5s)
+xgboost   local93  seed=3 val_aucpr=0.9841 thr=0.579 (4s)
+xgboost   local93  seed=4 val_aucpr=0.9836 thr=0.600 (3s)
+xgboost   local93  seed=5 val_aucpr=0.9858 thr=0.614 (3s)
+xgboost   local93  seed=6 val_aucpr=0.9836 thr=0.774 (6s)
+xgboost   local93  seed=7 val_aucpr=0.9839 thr=0.701 (4s)
+xgboost   local93  seed=8 val_aucpr=0.9859 thr=0.756 (4s)
+xgboost   local93  seed=9 val_aucpr=0.9846 thr=0.701 (4s)
+gcn       local93  seed=0 val_aucpr=0.7859 thr=0.857 (337s)
+gcn       local93  seed=1 val_aucpr=0.5100 thr=0.526 (43s)
+gcn       local93  seed=2 val_aucpr=0.8084 thr=0.870 (323s)
+gcn       local93  seed=3 val_aucpr=0.7933 thr=0.868 (315s)
+gcn       local93  seed=4 val_aucpr=0.7931 thr=0.864 (311s)
+gcn       local93  seed=5 val_aucpr=0.5365 thr=0.496 (38s)
+gcn       local93  seed=6 val_aucpr=0.6795 thr=0.853 (148s)
+gcn       local93  seed=7 val_aucpr=0.7967 thr=0.872 (314s)
+gcn       local93  seed=8 val_aucpr=0.5626 thr=0.489 (41s)
+gcn       local93  seed=9 val_aucpr=0.5291 thr=0.533 (50s)
+graphsage local93  seed=0 val_aucpr=0.9076 thr=0.853 (152s)
+graphsage local93  seed=1 val_aucpr=0.8925 thr=0.908 (179s)
+graphsage local93  seed=2 val_aucpr=0.8864 thr=0.877 (138s)
+graphsage local93  seed=3 val_aucpr=0.8787 thr=0.887 (175s)
+graphsage local93  seed=4 val_aucpr=0.9087 thr=0.853 (193s)
+graphsage local93  seed=5 val_aucpr=0.8628 thr=0.895 (147s)
+graphsage local93  seed=6 val_aucpr=0.9034 thr=0.905 (244s)
+graphsage local93  seed=7 val_aucpr=0.8845 thr=0.858 (183s)
+graphsage local93  seed=8 val_aucpr=0.8885 thr=0.877 (140s)
+graphsage local93  seed=9 val_aucpr=0.8900 thr=0.892 (242s)
+                        aucpr      f1  recall  fpr_licit
+feature_set model                                       
+all165      gcn        0.2884  0.3459  0.3930     0.0638
+            graphsage  0.4067  0.4590  0.4978     0.0465
+            xgboost    0.7814  0.7646  0.7133     0.0107
+local93     gcn        0.2129  0.2994  0.5782     0.1674
+            graphsage  0.3697  0.4364  0.6800     0.1006
+            xgboost    0.7457  0.7022  0.6597     0.0154
+
+[exit code 0]

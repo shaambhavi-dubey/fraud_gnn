@@ -1,0 +1,37 @@
+stage=inductive start=2026-10-05T19:52:55+00:00 head=df2ca3947f6a822b89080621e2cd85f431d8033d exec_commit=b57f61a4f484f8cb760f19b4af9e32aa4acf2993
+python=3.14.5 platform=Windows-11-10.0.26300-SP0
+inductive xgboost   seed=0 aucpr=0.9907
+C:\Users\hp\Downloads\fraud-shift-study\fraud-shift-study\.venv\Lib\site-packages\torch\jit\_script.py:1485: FutureWarning: `torch.jit.script` is not supported in Python 3.14+ and may break. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+inductive gcn       seed=0 aucpr=0.5477
+inductive graphsage seed=0 aucpr=0.9350
+inductive xgboost   seed=1 aucpr=0.9940
+inductive gcn       seed=1 aucpr=0.9117
+inductive graphsage seed=1 aucpr=0.9558
+inductive xgboost   seed=2 aucpr=0.9934
+inductive gcn       seed=2 aucpr=0.5197
+inductive graphsage seed=2 aucpr=0.9431
+inductive xgboost   seed=3 aucpr=0.9916
+inductive gcn       seed=3 aucpr=0.5817
+inductive graphsage seed=3 aucpr=0.9584
+inductive xgboost   seed=4 aucpr=0.9902
+inductive gcn       seed=4 aucpr=0.5424
+inductive graphsage seed=4 aucpr=0.9359
+inductive xgboost   seed=5 aucpr=0.9856
+inductive gcn       seed=5 aucpr=0.6182
+inductive graphsage seed=5 aucpr=0.9437
+inductive xgboost   seed=6 aucpr=0.9922
+inductive gcn       seed=6 aucpr=0.9039
+inductive graphsage seed=6 aucpr=0.9453
+inductive xgboost   seed=7 aucpr=0.9922
+inductive gcn       seed=7 aucpr=0.5125
+inductive graphsage seed=7 aucpr=0.9478
+inductive xgboost   seed=8 aucpr=0.9951
+inductive gcn       seed=8 aucpr=0.8969
+inductive graphsage seed=8 aucpr=0.9476
+inductive xgboost   seed=9 aucpr=0.9883
+inductive gcn       seed=9 aucpr=0.6131
+inductive graphsage seed=9 aucpr=0.9387
+wrote inductive_metrics.csv
+
+[exit code 0]

@@ -1,0 +1,9 @@
+stage=stats start=2026-10-05T20:46:01+00:00 head=df2ca3947f6a822b89080621e2cd85f431d8033d exec_commit=b57f61a4f484f8cb760f19b4af9e32aa4acf2993
+python=3.14.5 platform=Windows-11-10.0.26300-SP0
+bootstrap graphsage xgboost -0.5072 -0.2527
+bootstrap gcn xgboost -0.6057 -0.3566
+bootstrap graphsage gcn 0.028 0.1829
+
+PRIMARY (graphsage - xgboost): mean AUC-PR diff=-0.3747, Holm p=0.0000, bootstrap CI=[-0.5072, -0.2527] -> advantage supported by both tests
+
+[exit code 0]

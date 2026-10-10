@@ -1,0 +1,35 @@
+stage=shifts start=2026-10-05T19:50:02+00:00 head=df2ca3947f6a822b89080621e2cd85f431d8033d exec_commit=b57f61a4f484f8cb760f19b4af9e32aa4acf2993
+python=3.14.5 platform=Windows-11-10.0.26300-SP0
+shifts done: gcn 0
+shifts done: gcn 1
+shifts done: gcn 2
+shifts done: gcn 3
+shifts done: gcn 4
+shifts done: gcn 5
+shifts done: gcn 6
+shifts done: gcn 7
+shifts done: gcn 8
+shifts done: gcn 9
+shifts done: graphsage 0
+shifts done: graphsage 1
+shifts done: graphsage 2
+shifts done: graphsage 3
+shifts done: graphsage 4
+shifts done: graphsage 5
+shifts done: graphsage 6
+shifts done: graphsage 7
+shifts done: graphsage 8
+shifts done: graphsage 9
+shifts done: xgboost 0
+shifts done: xgboost 1
+shifts done: xgboost 2
+shifts done: xgboost 3
+shifts done: xgboost 4
+shifts done: xgboost 5
+shifts done: xgboost 6
+shifts done: xgboost 7
+shifts done: xgboost 8
+shifts done: xgboost 9
+wrote shift_metrics.csv
+
+[exit code 0]

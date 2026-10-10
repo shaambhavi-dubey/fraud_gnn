@@ -1,0 +1,22 @@
+stage=run_seeds start=2026-10-05T17:31:49+00:00 head=df2ca3947f6a822b89080621e2cd85f431d8033d exec_commit=b57f61a4f484f8cb760f19b4af9e32aa4acf2993
+python=3.14.5 platform=Windows-11-10.0.26300-SP0
+xgboost   all165   seed=0 val_aucpr=0.9880 thr=0.461 (11s)
+xgboost   all165   seed=1 val_aucpr=0.9880 thr=0.326 (13s)
+xgboost   all165   seed=2 val_aucpr=0.9861 thr=0.428 (13s)
+xgboost   all165   seed=3 val_aucpr=0.9868 thr=0.436 (12s)
+xgboost   all165   seed=4 val_aucpr=0.9871 thr=0.585 (11s)
+xgboost   all165   seed=5 val_aucpr=0.9882 thr=0.298 (15s)
+xgboost   all165   seed=6 val_aucpr=0.9875 thr=0.393 (17s)
+xgboost   all165   seed=7 val_aucpr=0.9857 thr=0.481 (11s)
+xgboost   all165   seed=8 val_aucpr=0.9869 thr=0.546 (10s)
+xgboost   all165   seed=9 val_aucpr=0.9869 thr=0.578 (15s)
+C:\Users\hp\Downloads\fraud-shift-study\fraud-shift-study\.venv\Lib\site-packages\torch\jit\_script.py:1485: FutureWarning: `torch.jit.script` is not supported in Python 3.14+ and may break. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+gcn       all165   seed=0 val_aucpr=0.6046 thr=0.542 (78s)
+gcn       all165   seed=1 val_aucpr=0.8281 thr=0.844 (440s)
+gcn       all165   seed=2 val_aucpr=0.5644 thr=0.523 (73s)
+gcn       all165   seed=3 val_aucpr=0.5973 thr=0.521 (77s)
+gcn       all165   seed=4 val_aucpr=0.8323 thr=0.681 (421s)
+gcn       all165   seed=5 val_aucpr=0.5559 thr=0.564 (44s)
+gcn       all165   seed=6 val_aucpr=0.8173 thr=0.811 (381s)
+gcn       all165   seed=7 val_aucpr=0.5118 thr=0.567 (46s)

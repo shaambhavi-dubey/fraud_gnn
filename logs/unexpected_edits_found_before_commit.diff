@@ -1,0 +1,37 @@
+﻿diff --git a/PROTOCOL.md b/PROTOCOL.md
+index 63ba142..eb1ffd2 100644
+--- a/PROTOCOL.md
++++ b/PROTOCOL.md
+@@ -133,6 +133,8 @@ Conclusions about "new nodes" must say which evaluation they come from.
+   hold-out is used for every model.
+ - Training graph: held-out nodes and ALL their incident edges removed. Held-out labels
+   and features are never used in training, preprocessing decisions or message passing.
++- Preprocessing for this evaluation: feature standardization is refit on the retained
++  nodes only (held-out node features never enter the mean or standard deviation).
+ - Inference graph: held-out nodes are added back with edges ONLY to retained
+   train-period nodes. Edges between two held-out nodes are dropped. No validation or
+   test nodes are in this graph.
+@@ -180,4 +182,7 @@ but no model outcomes):
+ - Temporal windows changed from {35-42, 43, 44-49} to {35-42, 43-49}. Reason: step 43
+   alone had 24 illicit test nodes, below the 30-node floor. This decision was made after
+   seeing per-time-step label counts.
+-Post-freeze deviations: (none yet)
+\ No newline at end of file
++Post-freeze deviations: (none yet)
++- Strict inductive evaluation: standardization refit on retained nodes only. Reason:
++  the main split standardizes on all train-period nodes, which would let held-out node
++  features influence preprocessing.
+\ No newline at end of file
+diff --git a/fraudshift/shifts.py b/fraudshift/shifts.py
+index ec40c47..a08364f 100644
+--- a/fraudshift/shifts.py
++++ b/fraudshift/shifts.py
+@@ -45,7 +45,7 @@ def main():
+     rows = []
+     for e in iter_scores(C.PRIMARY_FS):
+         y, s, t, thr = e["y"], e["s"], e["t"], e["thr"]
+-        grp = assign_group(e["indeg"])
++        grp = assign_group(e["insdeg"])
+         base = dict(seed=e["seed"], model=e["model"], feature_set=e["fs"])
+ 
+         # 1. natural temporal shift

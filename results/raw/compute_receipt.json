@@ -1,0 +1,50 @@
+{
+  "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu_count": 8,
+  "cuda_available": false,
+  "gpu": null,
+  "libraries": {
+    "torch": "2.14.0+cpu",
+    "torch_geometric": "2.8.0.post1",
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1",
+    "pandas": "3.0.6",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2"
+  },
+  "training_seconds": {
+    "gcn/all165": {
+      "runs": 10,
+      "total": 1950.7,
+      "mean": 195.1
+    },
+    "gcn/local93": {
+      "runs": 10,
+      "total": 1921.5,
+      "mean": 192.1
+    },
+    "graphsage/all165": {
+      "runs": 10,
+      "total": 2076.9,
+      "mean": 207.7
+    },
+    "graphsage/local93": {
+      "runs": 10,
+      "total": 1790.4,
+      "mean": 179.0
+    },
+    "xgboost/all165": {
+      "runs": 10,
+      "total": 127.7,
+      "mean": 12.8
+    },
+    "xgboost/local93": {
+      "runs": 10,
+      "total": 41.1,
+      "mean": 4.1
+    }
+  },
+  "total_training_seconds": 7908.3,
+  "note": "Covers model training and scoring in run_seeds only. Shifts, inductive, stats and plots are not timed here. Working hours are in hours_log.md."
+}

@@ -1,0 +1,10 @@
+stage=run_seeds start=2026-10-05T18:14:16+00:00 head=df2ca3947f6a822b89080621e2cd85f431d8033d exec_commit=b57f61a4f484f8cb760f19b4af9e32aa4acf2993
+python=3.14.5 platform=Windows-11-10.0.26300-SP0
+C:\Users\hp\Downloads\fraud-shift-study\fraud-shift-study\.venv\Lib\site-packages\torch\jit\_script.py:1485: FutureWarning: `torch.jit.script` is not supported in Python 3.14+ and may break. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+graphsage all165   seed=1 val_aucpr=0.9303 thr=0.902 (251s)
+graphsage all165   seed=2 val_aucpr=0.9330 thr=0.863 (238s)
+graphsage all165   seed=3 val_aucpr=0.9350 thr=0.879 (242s)
+graphsage all165   seed=4 val_aucpr=0.9371 thr=0.796 (179s)
+graphsage all165   seed=5 val_aucpr=0.9284 thr=0.854 (188s)
+graphsage all165   seed=6 val_aucpr=0.9244 thr=0.854 (160s)
